@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyRoad AI – Smart Pothole Detection</title>
+  <meta name="description" content="AI-powered pothole detection system using computer vision. Upload road images and detect potholes instantly with FixMyRoad AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- ░░ PARTICLE CANVAS ░░ -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- ░░ NAVBAR ░░ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⬡</span>
+      <span class="nav-title">FixMyRoad<span class="accent">AI</span></span>
+    </div>
+    <div class="nav-badge">
+      <span class="pulse-dot"></span>
+      AI Powered Smart City Solution
+    </div>
+  </nav>
+
+  <!-- ░░ HERO ░░ -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        Computer Vision Active
+      </div>
+      <h1 class="hero-title">
+        Fix<span class="gradient-text">My</span>Road <span class="gradient-text">AI</span>
+      </h1>
+      <p class="hero-subtitle">Smart Pothole Detection for Safer Roads</p>
+      <p class="hero-desc">
+        Upload a road image or switch to live webcam feed — our AI instantly
+        detects potholes using Canny Edge Detection &amp; Contour Analysis.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-primary" id="heroUploadBtn">
+          <span class="btn-icon">📂</span> Upload Road Image
+        </button>
+        <button class="btn-outline" id="heroCamBtn">
+          <span class="btn-icon">📷</span> Live Camera
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">99.2<span class="unit">%</span></span><span class="stat-label">Uptime</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">0.3<span class="unit">s</span></span><span class="stat-label">Avg Detection</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">5<span class="unit">+</span></span><span class="stat-label">CV Algorithms</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="scanner-box">
+        <div class="scanner-corner tl"></div>
+        <div class="scanner-corner tr"></div>
+        <div class="scanner-corner bl"></div>
+        <div class="scanner-corner br"></div>
+        <div class="scanner-line"></div>
+        <div class="scanner-inner">
+          <div class="scan-icon">🛣️</div>
+          <p class="scan-hint">Road Analysis Ready</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ MODE TOGGLE ░░ -->
+  <section class="mode-section" id="modeSection">
+    <div class="mode-toggle-wrap">
+      <button class="mode-btn active" id="modeImage" data-mode="image">
+        <span>🖼️</span> Image Upload
+      </button>
+      <button class="mode-btn" id="modeCam" data-mode="camera">
+        <span>📷</span> Live Detection
+      </button>
+    </div>
+  </section>
+
+  <!-- ░░ UPLOAD SECTION ░░ -->
+  <section class="upload-section" id="imageMode">
+    <div class="section-header">
+      <h2 class="section-title">Upload Road Image</h2>
+      <p class="section-sub">Drag &amp; drop or click to select a road photograph</p>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" hidden />
+      <div class="dropzone-inner" id="dropzoneInner">
+        <div class="upload-icon-wrap">
+          <div class="upload-icon">☁️</div>
+          <div class="upload-rings">
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+          </div>
+        </div>
+        <p class="drop-title">Drop your image here</p>
+        <p class="drop-sub">Supports JPG, PNG, WEBP, BMP · Max 16 MB</p>
+        <button class="btn-primary btn-sm" id="browseBtn">Browse Files</button>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-wrap hidden" id="previewWrap">
+      <div class="preview-card">
+        <div class="preview-label">Selected Image</div>
+        <img id="previewImg" src="" alt="Preview" />
+        <div class="preview-meta" id="previewMeta"></div>
+      </div>
+      <button class="btn-primary btn-detect" id="detectBtn">
+        <span class="btn-icon">🔍</span>
+        Analyze with AI
+        <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ░░ CAMERA SECTION ░░ -->
+  <section class="camera-section hidden" id="cameraMode">
+    <div class="section-header">
+      <h2 class="section-title">Live Camera Detection</h2>
+      <p class="section-sub">Real-time pothole scanning via your webcam</p>
+    </div>
+    <div class="camera-wrap">
+      <video id="webcamFeed" autoplay muted playsinline></video>
+      <canvas id="camCanvas" hidden></canvas>
+      <div class="cam-overlay">
+        <div class="cam-corner ctla"></div><div class="cam-corner ctra"></div>
+        <div class="cam-corner cbla"></div><div class="cam-corner cbra"></div>
+        <div class="cam-hud-text">LIVE · AI SCAN</div>
+      </div>
+    </div>
+    <div class="cam-controls">
+      <button class="btn-primary" id="startCamBtn">▶ Start Camera</button>
+      <button class="btn-danger hidden" id="stopCamBtn">■ Stop</button>
+      <button class="btn-outline" id="captureCamBtn" disabled>📸 Capture &amp; Analyze</button>
+    </div>
+  </section>
+
+  <!-- ░░ LOADER ░░ -->
+  <section class="loader-section hidden" id="loaderSection">
+    <div class="loader-card">
+      <div class="loader-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring r2"></div>
+        <div class="spinner-ring r3"></div>
+        <div class="spinner-core">⬡</div>
+      </div>
+      <h3 class="loader-title">Analyzing Image with AI…</h3>
+      <p class="loader-sub">Applying Canny Edge Detection &amp; Contour Analysis</p>
+      <div class="loader-steps">
+        <div class="lstep" id="ls1">✓ Grayscale Conversion</div>
+        <div class="lstep" id="ls2">✓ Gaussian Blur</div>
+        <div class="lstep" id="ls3">✓ Edge Detection</div>
+        <div class="lstep" id="ls4">✓ Contour Mapping</div>
+        <div class="lstep" id="ls5">✓ Pothole Classification</div>
+      </div>
+      <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+    </div>
+  </section>
+
+  <!-- ░░ RESULTS ░░ -->
+  <section class="results-section hidden" id="resultsSection">
+    <div class="section-header">
+      <h2 class="section-title">Detection Results</h2>
+      <p class="section-sub" id="resultSubtitle">AI analysis complete</p>
+    </div>
+
+    <!-- Confidence Banner -->
+    <div class="confidence-banner" id="confidenceBanner">
+      <div class="conf-icon" id="confIcon">⚠️</div>
+      <div class="conf-info">
+        <h3 class="conf-title" id="confTitle">Pothole Detected</h3>
+        <p class="conf-desc" id="confDesc">High confidence pothole region found</p>
+      </div>
+      <div class="conf-score-wrap">
+        <div class="conf-score" id="confScore">0%</div>
+        <div class="conf-label">Confidence</div>
+      </div>
+    </div>
+
+    <!-- Before / After -->
+    <div class="comparison-grid">
+      <div class="comp-card">
+        <div class="comp-badge original-badge">Original</div>
+        <img id="originalImg" src="" alt="Original road image" />
+      </div>
+      <div class="comp-divider"><span>VS</span></div>
+      <div class="comp-card">
+        <div class="comp-badge detected-badge">AI Detected</div>
+        <img id="processedImg" src="" alt="Processed road image with detections" />
+      </div>
+    </div>
+
+    <!-- Detection Details -->
+    <div class="details-grid" id="detailsGrid"></div>
+
+    <!-- Map Placeholder -->
+    <div class="map-placeholder">
+      <div class="map-overlay-text">
+        <div class="map-icon">🗺️</div>
+        <h4>Location Mapping</h4>
+        <p>GPS-based pothole map — Coming Soon</p>
+        <span class="coming-soon-badge">Future Feature</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions">
+      <button class="btn-primary" id="analyzeAnotherBtn">🔄 Analyze Another</button>
+      <button class="btn-outline" id="downloadBtn">⬇ Download Report</button>
+    </div>
+  </section>
+
+  <!-- ░░ FEATURES STRIP ░░ -->
+  <section class="features-section">
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <h4>OpenCV Detection</h4>
+        <p>Grayscale → Blur → Canny Edges → Contours pipeline</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <h4>Instant Results</h4>
+        <p>Sub-second processing with bounding box overlays</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h4>Confidence Score</h4>
+        <p>Per-pothole severity rating and confidence metrics</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📷</div>
+        <h4>Live Webcam</h4>
+        <p>Real-time capture and frame-by-frame analysis</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="footer">
+    <div class="footer-glow"></div>
+    <div class="footer-content">
+      <div class="footer-brand">⬡ FixMyRoad<span class="accent">AI</span></div>
+      <p class="footer-tagline">Built with AI + Computer Vision</p>
+      <div class="footer-tech">
+        <span class="tech-pill">Python</span>
+        <span class="tech-pill">Flask</span>
+        <span class="tech-pill">OpenCV</span>
+        <span class="tech-pill">Canny Edges</span>
+        <span class="tech-pill">Contour Detection</span>
+      </div>
+      <p class="footer-copy">© 2025 FixMyRoad AI · Smart City Infrastructure Intelligence</p>
+    </div>
+  </footer>
+
+  <!-- ░░ TOAST ░░ -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- ░░ SOUND (data-URI beep) ░░ -->
+  <audio id="detectSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav" />
+  </audio>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
